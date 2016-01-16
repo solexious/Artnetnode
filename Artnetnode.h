@@ -19,9 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef ARTNETNODE_H
 #define ARTNETNODE_H
 
-#include "Energia.h"
-#include <Ethernet.h>
-#include <EthernetUdp.h>
+// #include "Energia.h"
+// #include <Ethernet.h>
+// #include <EthernetUdp.h>
+#include <ESP8266WiFi.h>
+#include <WiFiUdp.h>
 #include "OpCodes.h"
 #include "NodeReportCodes.h"
 #include "StyleCodes.h"
@@ -34,7 +36,7 @@ class Artnetnode{
 public:
   Artnetnode();
 
-  uint8_t begin(byte mac[], uint8_t numOutputs);
+  uint8_t begin(char ssid[], char pass[], uint8_t numOutputs);
   uint16_t read();
 
   // Node identity
@@ -54,9 +56,14 @@ public:
 
   // DMX tick
   void tickDMX(uint32_t time);
+  void sendDMX();
+
+  
+  uint8_t returnDMXValue(uint8_t outputID, uint8_t channel);
+
 
 private:
-  EthernetUDP Udp;
+  WiFiUDP Udp;
   PollReply PollReplyPacket;
 
   // Packet handlers
@@ -82,7 +89,6 @@ private:
   uint16_t startingUniverse;
 
   // DMX tick
-  void sendDMX();
   void uartDMX(uint8_t outputID, uint8_t uartNum);
   uint8_t* getDmxFrame(uint8_t outputID);
   uint8_t msSinceDMXSend;

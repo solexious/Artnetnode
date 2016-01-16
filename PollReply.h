@@ -18,9 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Class for saving details to and for constructing pollreply packets
 
-#include "Energia.h"
-#include <Ethernet.h>
-#include <EthernetUdp.h>
+// #include "Energia.h"
+// #include <Ethernet.h>
+// #include <EthernetUdp.h>
+#include <ESP8266WiFi.h>
+#include <WiFiUdp.h>
 #include "OpCodes.h"
 #include "NodeReportCodes.h"
 #include "StyleCodes.h"

@@ -17,11 +17,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <Artnetnode.h>
-#include <HardwareSerial.cpp>
+#include "user_interface.h"
+// #include <HardwareSerial.cpp>
 
 Artnetnode::Artnetnode() {
-  Ethernet.enableLinkLed();
-  Ethernet.enableActivityLed();
+  // Ethernet.enableLinkLed();
+  // Ethernet.enableActivityLed();
 
   // Initalise DMXOutput array
   for(int i = 0; i < DMX_MAX_OUTPUTS; i++){
@@ -39,12 +40,20 @@ Artnetnode::Artnetnode() {
   }
 }
 
-uint8_t Artnetnode::begin(byte mac[], uint8_t numOutputs){
-  if(Ethernet.begin(mac)){
+uint8_t Artnetnode::begin(char ssid[], char pass[], uint8_t numOutputs){
+  if(WiFi.begin(ssid, pass)){
+    while (WiFi.status() != WL_CONNECTED) {
+      delay(500);
+      Serial.print(".");
+    }
+  
     Udp.begin(ARTNET_PORT);
-    localIP = Ethernet.localIP();
-    localMask = Ethernet.subnetMask();
+    localIP = WiFi.localIP();
+    localMask = WiFi.subnetMask();
     localBroadcast = IPAddress(localIP | ~localMask);
+
+    uint8_t mac[6];
+    WiFi.macAddress(mac);
 
     PollReplyPacket.setMac(mac);
     PollReplyPacket.setIP(localIP);
@@ -103,7 +112,7 @@ uint16_t Artnetnode::read(){
 }
 
 bool Artnetnode::isBroadcast(){
-  if(Udp.destIP() == localBroadcast){
+  if(Udp.destinationIP() == localBroadcast){
     return true;
   }
   else{
@@ -138,6 +147,10 @@ uint16_t Artnetnode::handleDMX(){
 
     return OpDmx;
   }
+}
+
+uint8_t Artnetnode::returnDMXValue(uint8_t outputID, uint8_t channel){
+  return DMXBuffer[outputID][channel];
 }
 
 uint16_t Artnetnode::handlePollRequest(){
@@ -225,116 +238,44 @@ void Artnetnode::sendDMX(){
 }
 
 void Artnetnode::uartDMX(uint8_t outputID, uint8_t uartNum){
-  if(uartNum == 0){
-    Serial.begin(125000);
+  if(uartNum == 1){
+    // Serial1.begin(125000, SERIAL_8N2);
+    // Serial1.write((uint8_t)0);
+    // Serial1.flush();
+
+    /*Serial.begin(125000);
     ROM_UARTConfigSetExpClk(UART0_BASE, F_CPU, 125000,
                               (UART_CONFIG_PAR_NONE | UART_CONFIG_STOP_TWO |
                               UART_CONFIG_WLEN_8));
     Serial.write((uint8_t)0);
-    Serial.flush();
-    Serial.begin(250000);
+    Serial.flush();*/
+
+    // Serial1.begin(250000, SERIAL_8N2);
+    // Serial1.write(DMXBuffer[outputID], 512);
+
+    /*Serial.begin(250000);
     ROM_UARTConfigSetExpClk(UART0_BASE, F_CPU, 250000,
                               (UART_CONFIG_PAR_NONE | UART_CONFIG_STOP_TWO |
                               UART_CONFIG_WLEN_8));
     Serial.write((uint8_t)0);
-    Serial.write(DMXBuffer[outputID], 512);
-  }
-  else if(uartNum == 1){
-    Serial1.begin(125000);
-    ROM_UARTConfigSetExpClk(UART1_BASE, F_CPU, 125000,
-                              (UART_CONFIG_PAR_NONE | UART_CONFIG_STOP_TWO |
-                              UART_CONFIG_WLEN_8));
-    Serial1.write((uint8_t)0);
+    Serial.write(DMXBuffer[outputID], 512);*/
+
+    digitalWrite(2, HIGH);
+    Serial1.begin(83333, SERIAL_8N1);
+    Serial1.write(0);
     Serial1.flush();
-    Serial1.begin(250000);
-    ROM_UARTConfigSetExpClk(UART1_BASE, F_CPU, 250000,
-                              (UART_CONFIG_PAR_NONE | UART_CONFIG_STOP_TWO |
-                              UART_CONFIG_WLEN_8));
-    Serial1.write((uint8_t)0);
+    delay(1);
+    Serial1.end();
+
+    //send data
+    Serial1.begin(250000, SERIAL_8N2);
+    digitalWrite(2, LOW);
     Serial1.write(DMXBuffer[outputID], 512);
-  }
-  else if(uartNum == 2){
-    Serial2.begin(125000);
-    ROM_UARTConfigSetExpClk(UART2_BASE, F_CPU, 125000,
-                              (UART_CONFIG_PAR_NONE | UART_CONFIG_STOP_TWO |
-                              UART_CONFIG_WLEN_8));
-    Serial2.write((uint8_t)0);
-    Serial2.flush();
-    Serial2.begin(250000);
-    ROM_UARTConfigSetExpClk(UART2_BASE, F_CPU, 250000,
-                              (UART_CONFIG_PAR_NONE | UART_CONFIG_STOP_TWO |
-                              UART_CONFIG_WLEN_8));
-    Serial2.write((uint8_t)0);
-    Serial2.write(DMXBuffer[outputID], 512);
-  }
-  else if(uartNum == 3){
-    Serial3.begin(125000);
-    ROM_UARTConfigSetExpClk(UART3_BASE, F_CPU, 125000,
-                              (UART_CONFIG_PAR_NONE | UART_CONFIG_STOP_TWO |
-                              UART_CONFIG_WLEN_8));
-    Serial3.write((uint8_t)0);
-    Serial3.flush();
-    Serial3.begin(250000);
-    ROM_UARTConfigSetExpClk(UART3_BASE, F_CPU, 250000,
-                              (UART_CONFIG_PAR_NONE | UART_CONFIG_STOP_TWO |
-                              UART_CONFIG_WLEN_8));
-    Serial3.write((uint8_t)0);
-    Serial3.write(DMXBuffer[outputID], 512);
-  }
-  else if(uartNum == 4){
-    Serial4.begin(125000);
-    ROM_UARTConfigSetExpClk(UART4_BASE, F_CPU, 125000,
-                              (UART_CONFIG_PAR_NONE | UART_CONFIG_STOP_TWO |
-                              UART_CONFIG_WLEN_8));
-    Serial4.write((uint8_t)0);
-    Serial4.flush();
-    Serial4.begin(250000);
-    ROM_UARTConfigSetExpClk(UART4_BASE, F_CPU, 250000,
-                              (UART_CONFIG_PAR_NONE | UART_CONFIG_STOP_TWO |
-                              UART_CONFIG_WLEN_8));
-    Serial4.write((uint8_t)0);
-    Serial4.write(DMXBuffer[outputID], 512);
-  }
-  else if(uartNum == 5){
-    Serial5.begin(125000);
-    ROM_UARTConfigSetExpClk(UART5_BASE, F_CPU, 125000,
-                              (UART_CONFIG_PAR_NONE | UART_CONFIG_STOP_TWO |
-                              UART_CONFIG_WLEN_8));
-    Serial5.write((uint8_t)0);
-    Serial5.flush();
-    Serial5.begin(250000);
-    ROM_UARTConfigSetExpClk(UART5_BASE, F_CPU, 250000,
-                              (UART_CONFIG_PAR_NONE | UART_CONFIG_STOP_TWO |
-                              UART_CONFIG_WLEN_8));
-    Serial5.write((uint8_t)0);
-    Serial5.write(DMXBuffer[outputID], 512);
-  }
-  else if(uartNum == 6){
-    Serial6.begin(125000);
-    ROM_UARTConfigSetExpClk(UART6_BASE, F_CPU, 125000,
-                              (UART_CONFIG_PAR_NONE | UART_CONFIG_STOP_TWO |
-                              UART_CONFIG_WLEN_8));
-    Serial6.write((uint8_t)0);
-    Serial6.flush();
-    Serial6.begin(250000);
-    ROM_UARTConfigSetExpClk(UART6_BASE, F_CPU, 250000,
-                              (UART_CONFIG_PAR_NONE | UART_CONFIG_STOP_TWO |
-                              UART_CONFIG_WLEN_8));
-    Serial6.write((uint8_t)0);
-    Serial6.write(DMXBuffer[outputID], 512);
-  }
-  else if(uartNum == 7){
-    Serial7.begin(125000);
-    ROM_UARTConfigSetExpClk(UART7_BASE, F_CPU, 125000,
-                              (UART_CONFIG_PAR_NONE | UART_CONFIG_STOP_TWO |
-                              UART_CONFIG_WLEN_8));
-    Serial7.write((uint8_t)0);
-    Serial7.flush();
-    Serial7.begin(250000);
-    ROM_UARTConfigSetExpClk(UART7_BASE, F_CPU, 250000,
-                              (UART_CONFIG_PAR_NONE | UART_CONFIG_STOP_TWO |
-                              UART_CONFIG_WLEN_8));
-    Serial7.write((uint8_t)0);
-    Serial7.write(DMXBuffer[outputID], 512);
+    Serial1.flush();
+    delay(1);
+    Serial1.end();
+
+    Serial.println(DMXBuffer[outputID][0]);
+
   }
 }

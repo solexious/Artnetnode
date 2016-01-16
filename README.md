@@ -1,14 +1,11 @@
 # Artnetnode
-An artnet and DMX processing and handling library for the Tiva C Launchpad though the Energia IDE
+An artnet and DMX processing and handling library for the ESP8266 though the Arduino IDE
 
 ### Requirements
-Requires a build of the latest energia from git for changes to the ethernet library
-
-http://github.com/energia/Energia
+Arduino 1.6.5 with the 2.0.0 install of the ESP8266 board from https://github.com/esp8266/Arduino
 
 ### Copyright
 Charles Yarnold 2015 - charlesyarnold@gmail.com
 
 ### Acknowledgments
-* DMX sending based on - http://playground.arduino.cc/Learning/DMXSerial
 * Artnet handling inspired by - https://github.com/natcl/Artnet
