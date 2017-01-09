@@ -70,19 +70,19 @@ void PollReply::setLongName(char name[]){
 
 void PollReply::canDHCP(bool can){
   if(can){
-    packet.Status2 = packet.Status2 | 0b00100000;
+    packet.Status2 = packet.Status2 | 0b00000100;
   }
   else{
-    packet.Status2 = packet.Status2 & (~0b00100000);
+    packet.Status2 = packet.Status2 & (~0b00000100);
   }
 }
 
 void PollReply::isDHCP(bool is){
   if(is){
-    packet.Status2 = packet.Status2 | 0b01000000;
+    packet.Status2 = packet.Status2 | 0b00000010;
   }
   else{
-    packet.Status2 = packet.Status2 & (~0b01000000);
+    packet.Status2 = packet.Status2 & (~0b00000010);
   }
 }
 
